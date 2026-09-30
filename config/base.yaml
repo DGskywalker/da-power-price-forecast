@@ -1,0 +1,77 @@
+seed: 42
+
+zones:
+  DE_LU:
+    currency: "EUR"
+    unit: "EUR/MWh"
+    timezone: "Europe/Berlin"
+    entsoe_bzn: "10Y1001A1001A82H"  # DE-LU BZN EIC code
+    energy_charts_bzn: "DE-LU"
+    gate_closure_cet: "12:00"
+    weather_cities:
+      - name: "Berlin"
+        lat: 52.52
+        lon: 13.405
+        weight: 0.28
+      - name: "Hamburg"
+        lat: 53.55
+        lon: 9.99
+        weight: 0.20
+      - name: "Munich"
+        lat: 48.137
+        lon: 11.575
+        weight: 0.22
+      - name: "Cologne"
+        lat: 50.938
+        lon: 6.96
+        weight: 0.16
+      - name: "Frankfurt"
+        lat: 50.11
+        lon: 8.68
+        weight: 0.14
+  GB:
+    currency: "GBP"
+    unit: "GBP/MWh"
+    timezone: "Europe/London"
+    entsoe_bzn: "10YGB----------A"  # GB EIC code
+    elexon_market: "MID"
+    gate_closure_gmt: "11:00"
+    weather_cities:
+      - name: "London"
+        lat: 51.5074
+        lon: -0.1278
+        weight: 0.40
+      - name: "Birmingham"
+        lat: 52.4862
+        lon: -1.8904
+        weight: 0.20
+      - name: "Manchester"
+        lat: 53.4808
+        lon: -2.2426
+        weight: 0.18
+      - name: "Glasgow"
+        lat: 55.8642
+        lon: -4.2518
+        weight: 0.12
+      - name: "Cardiff"
+        lat: 51.4816
+        lon: -3.1791
+        weight: 0.10
+
+dates:
+  start_date: "2022-01-01"
+  end_date: "2024-12-31"
+  test_months: 6  # Last N months used in walk-forward evaluation
+
+paths:
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  models_dir: "artifacts/models"
+  reports_dir: "reports"
+  figures_dir: "reports/figures"
+
+backtest:
+  min_train_months: 24
+  step_months: 1
+  horizon_hours: 24
+  refit_cadence: "monthly"
