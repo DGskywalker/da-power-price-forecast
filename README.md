@@ -1,4 +1,4 @@
-# ⚡ Day-Ahead Electricity Price Forecasting (DE-LU & GB)
+# Day-Ahead Electricity Price Forecasting (DE-LU & GB)
 
 [![Python 3.11](https://img.shields.io/badge/python-3.11-3776AB.svg?style=flat&logo=python&logoColor=white)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.14-EE4C2C.svg?style=flat&logo=pytorch&logoColor=white)](https://pytorch.org/)
@@ -14,13 +14,13 @@ Engineered with **strict gate-closure enforcement (zero future lookahead)**, exp
 
 ---
 
-## 🏗️ System Architecture & Pipeline
+## System Architecture & Pipeline
 
 ![End-to-End Pipeline Architecture](reports/figures/pipeline_architecture.png)
 
 ---
 
-## 📌 1. The Problem: Electricity Price Volatility & Grid Constraints
+## 1. The Problem: Electricity Price Volatility & Grid Constraints
 
 Unlike storable physical commodities such as crude oil or natural gas, **electricity cannot be cost-effectively stored at national grid scale**. Grid operators must continuously balance supply and generation every second.
 
@@ -34,7 +34,7 @@ Unlike storable physical commodities such as crude oil or natural gas, **electri
 
 ---
 
-## 💡 2. The Solution: Institutional Forecasting Engine
+## 2. The Solution: Institutional Forecasting Engine
 
 Our system replaces heuristic rules of thumb with a multi-horizon, domain-aware quantitative pipeline:
 
@@ -55,14 +55,14 @@ Our system replaces heuristic rules of thumb with a multi-horizon, domain-aware 
 
 ---
 
-## 📊 3. Empirical Results: Benchmark League Tables
+## 3. Empirical Results: Benchmark League Tables
 
 ### Germany-Luxembourg (DE-LU) Bidding Zone
 *Evaluated out-of-sample across monthly expanding-window folds:*
 
 | Model | MAE (€/MWh) | RMSE (€/MWh) | sMAPE (%) | Bias (€) | DM p-value vs Naive | Statistical Decision |
 |:---|:---:|:---:|:---:|:---:|:---:|:---|
-| **CatBoost** | **20.58** | **28.19** | **36.5%** | **+9.16** | **0.0000** | **🏆 STATISTICAL WINNER (26.4% Edge)** |
+| **CatBoost** | **20.58** | **28.19** | **36.5%** | **+9.16** | **0.0000** | **STATISTICAL WINNER (26.4% Edge)** |
 | **XGBoost** | 21.84 | 29.35 | 37.4% | +13.17 | 0.0003 | Statistically Significant ($p < 0.001$) |
 | **LightGBM** | 21.93 | 30.16 | 37.4% | +12.18 | 0.0005 | Statistically Significant ($p < 0.001$) |
 | **Hybrid (LSTM + LGBM)**| 24.04 | 33.23 | 40.9% | +9.11 | 0.0280 | Statistically Significant ($p = 0.028$) |
@@ -79,7 +79,7 @@ Our system replaces heuristic rules of thumb with a multi-horizon, domain-aware 
 
 | Model | MAE (£/MWh) | RMSE (£/MWh) | sMAPE (%) | Bias (£) | DM p-value vs Naive | Statistical Decision |
 |:---|:---:|:---:|:---:|:---:|:---:|:---|
-| **LightGBM** | **16.18** | **26.93** | **23.9%** | **+3.14** | **0.0000** | **🏆 STATISTICAL WINNER (25.3% Edge)** |
+| **LightGBM** | **16.18** | **26.93** | **23.9%** | **+3.14** | **0.0000** | **STATISTICAL WINNER (25.3% Edge)** |
 | **CatBoost** | 16.46 | 27.07 | 24.2% | +2.34 | 0.0000 | Statistically Significant ($p < 0.001$) |
 | **XGBoost** | 16.56 | 27.67 | 24.1% | +3.68 | 0.0000 | Statistically Significant ($p < 0.001$) |
 | **Hybrid (LSTM + LGBM)**| 19.64 | 31.82 | 27.5% | +4.85 | 0.0530 | Marginally Significant |
@@ -91,7 +91,7 @@ Our system replaces heuristic rules of thumb with a multi-horizon, domain-aware 
 
 ---
 
-## 📈 4. Visual Diagnostics & Output Gallery
+## 4. Visual Diagnostics & Output Gallery
 
 ### A. Forecast vs Actual (14-Day Delivery Overlay with 80% Prediction Band)
 Shows out-of-sample delivery tracking against realized prices alongside calibrated probabilistic intervals $[q_{10}, q_{90}]$:
@@ -129,7 +129,7 @@ Local explanation identifying which fundamental shocks drove an extreme price sp
 
 ---
 
-## 🛠️ 5. Technology Stack & Technical Rationale
+## 5. Technology Stack & Technical Rationale
 
 | Category | Technology | Commercial / Technical Justification |
 |---|---|---|
@@ -144,7 +144,7 @@ Local explanation identifying which fundamental shocks drove an extreme price sp
 
 ---
 
-## ⚡ 6. Quant Interview Defense: 3 Critical Concepts
+## 6. Quant Interview Defense: 3 Critical Concepts
 
 ### 1. Why Walk-Forward Expanding Window and NOT K-Fold Cross-Validation?
 Standard $K$-fold cross-validation shuffles observations across time. In electricity price forecasting, this causes catastrophic temporal leakage: the model conditions on tomorrow's price spikes, merit-order shifts, and weather systems to predict yesterday's prices. 
@@ -171,7 +171,7 @@ In European power auctions:
 
 ---
 
-## 🚀 7. Quickstart & Step-by-Step Reproduction
+## 7. Quickstart & Step-by-Step Reproduction
 
 ### Step 1: Clone Repository
 ```bash
@@ -198,7 +198,7 @@ make all
 
 ---
 
-## 📂 Repository Directory Layout
+## Repository Directory Layout
 
 ```text
 da-power-price-forecast/
@@ -255,5 +255,5 @@ da-power-price-forecast/
 
 ---
 
-## 📜 License
+## License
 Distributed under the **MIT License**. See `LICENSE` for more information.
