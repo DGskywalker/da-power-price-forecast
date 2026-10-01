@@ -144,7 +144,7 @@ Local explanation identifying which fundamental shocks drove an extreme price sp
 
 ---
 
-## 6. Quant Interview Defense: 3 Critical Concepts
+## 6. Quantitative & Methodological Rationale: 3 Critical Concepts
 
 ### 1. Why Walk-Forward Expanding Window and NOT K-Fold Cross-Validation?
 Standard $K$-fold cross-validation shuffles observations across time. In electricity price forecasting, this causes catastrophic temporal leakage: the model conditions on tomorrow's price spikes, merit-order shifts, and weather systems to predict yesterday's prices. 
