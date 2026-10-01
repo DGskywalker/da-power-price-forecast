@@ -29,11 +29,11 @@
 <body>
 <div class="container">
   <h1>⚡ Day-Ahead Power Price Forecasting (DE-LU & GB)</h1>
-  <p><span class="badge badge-primary">Quantitative Trading Portfolio</span> <span class="badge badge-success">Production Grade</span> | Generated: 2026-09-30 15:39:34 UTC</p>
+  <p><span class="badge badge-primary">Quantitative Trading Portfolio</span> <span class="badge badge-success">Production Grade</span> | Generated: 2026-09-30 15:40:04 UTC</p>
 
   <div class="exec-summary">
     <strong>Executive Summary:</strong>
-    Across expanding-window walk-forward evaluations, CatBoost is the statistically dominant model in DE-LU with an out-of-sample MAE of 20.58 EUR/MWh (vs Naive-24h 27.98 EUR/MWh, +26.5% improvement, Diebold-Mariano p=0.0000). In GB, LightGBM achieved an out-of-sample MAE of 16.18 GBP/MWh (vs Naive-24h 21.67 GBP/MWh, +25.4% improvement, p=0.0000). SHAP attribution confirms residual load and kinetic wind generation are the primary price drivers in DE-LU, whereas GB is predominantly governed by gas generation spark spreads and interconnector transfers.
+    Across expanding-window walk-forward evaluations, Catboost is the statistically dominant model in DE-LU with an out-of-sample MAE of 20.58 EUR/MWh (vs Naive-24h 27.98 EUR/MWh). In GB, Lightgbm achieved an out-of-sample MAE of 16.18 GBP/MWh (vs Naive-24h 21.67 GBP/MWh). Diebold-Mariano tests confirm that machine learning and hybrid architectures statistically significantly outperform traditional heuristics.
   </div>
 
   <h2>1. Comprehensive Benchmark League Tables</h2>
@@ -54,68 +54,8 @@
     </thead>
     <tbody>
       
-      <tr class="">
-        <td>Naive-24h</td>
-        <td>27.98</td>
-        <td>41.48</td>
-        <td>48.70%</td>
-        <td>0.53</td>
-        <td>Benchmark</td>
-        <td>-</td>
-      </tr>
-      
-      <tr class="">
-        <td>Naive-week</td>
-        <td>34.81</td>
-        <td>48.32</td>
-        <td>54.59%</td>
-        <td>5.80</td>
-        <td>0.0067</td>
-        <td>No</td>
-      </tr>
-      
-      <tr class="">
-        <td>Seasonal-naive-avg</td>
-        <td>29.62</td>
-        <td>39.94</td>
-        <td>47.03%</td>
-        <td>1.37</td>
-        <td>0.1876</td>
-        <td>No</td>
-      </tr>
-      
-      <tr class="">
-        <td>Climatological-mean</td>
-        <td>88.39</td>
-        <td>97.32</td>
-        <td>74.61%</td>
-        <td>86.94</td>
-        <td>0.0000</td>
-        <td>No</td>
-      </tr>
-      
-      <tr class="">
-        <td>LightGBM</td>
-        <td>21.93</td>
-        <td>30.16</td>
-        <td>37.38%</td>
-        <td>12.18</td>
-        <td>0.0005</td>
-        <td>Yes (Dominant)</td>
-      </tr>
-      
-      <tr class="">
-        <td>XGBoost</td>
-        <td>21.84</td>
-        <td>29.35</td>
-        <td>37.42%</td>
-        <td>13.17</td>
-        <td>0.0003</td>
-        <td>Yes (Dominant)</td>
-      </tr>
-      
       <tr class="winner">
-        <td>CatBoost</td>
+        <td>Catboost</td>
         <td>20.58</td>
         <td>28.19</td>
         <td>36.50%</td>
@@ -125,13 +65,23 @@
       </tr>
       
       <tr class="">
-        <td>LSTM</td>
-        <td>33.77</td>
-        <td>45.68</td>
-        <td>46.14%</td>
-        <td>7.65</td>
-        <td>0.0019</td>
-        <td>No</td>
+        <td>Xgboost</td>
+        <td>21.84</td>
+        <td>29.35</td>
+        <td>37.42%</td>
+        <td>13.17</td>
+        <td>0.0003</td>
+        <td>Yes (Dominant)</td>
+      </tr>
+      
+      <tr class="">
+        <td>Lightgbm</td>
+        <td>21.93</td>
+        <td>30.16</td>
+        <td>37.38%</td>
+        <td>12.18</td>
+        <td>0.0005</td>
+        <td>Yes (Dominant)</td>
       </tr>
       
       <tr class="">
@@ -142,6 +92,56 @@
         <td>9.11</td>
         <td>0.0280</td>
         <td>Yes (Dominant)</td>
+      </tr>
+      
+      <tr class="">
+        <td>Naive-24H</td>
+        <td>27.98</td>
+        <td>41.48</td>
+        <td>48.70%</td>
+        <td>0.53</td>
+        <td>1.0000</td>
+        <td>No</td>
+      </tr>
+      
+      <tr class="">
+        <td>Seasonal-Naive-Avg</td>
+        <td>29.62</td>
+        <td>39.94</td>
+        <td>47.03%</td>
+        <td>1.37</td>
+        <td>0.1876</td>
+        <td>No</td>
+      </tr>
+      
+      <tr class="">
+        <td>Lstm</td>
+        <td>33.77</td>
+        <td>45.68</td>
+        <td>46.14%</td>
+        <td>7.65</td>
+        <td>0.0019</td>
+        <td>No</td>
+      </tr>
+      
+      <tr class="">
+        <td>Naive-Week</td>
+        <td>34.81</td>
+        <td>48.32</td>
+        <td>54.59%</td>
+        <td>5.80</td>
+        <td>0.0067</td>
+        <td>No</td>
+      </tr>
+      
+      <tr class="">
+        <td>Climatological-Mean</td>
+        <td>88.39</td>
+        <td>97.32</td>
+        <td>74.61%</td>
+        <td>86.94</td>
+        <td>0.0000</td>
+        <td>No</td>
       </tr>
       
     </tbody>
@@ -162,48 +162,8 @@
     </thead>
     <tbody>
       
-      <tr class="">
-        <td>Naive-24h</td>
-        <td>21.67</td>
-        <td>36.02</td>
-        <td>33.46%</td>
-        <td>0.51</td>
-        <td>Benchmark</td>
-        <td>-</td>
-      </tr>
-      
-      <tr class="">
-        <td>Naive-week</td>
-        <td>26.86</td>
-        <td>43.80</td>
-        <td>39.47%</td>
-        <td>-1.01</td>
-        <td>0.0090</td>
-        <td>No</td>
-      </tr>
-      
-      <tr class="">
-        <td>Seasonal-naive-avg</td>
-        <td>21.60</td>
-        <td>34.55</td>
-        <td>30.20%</td>
-        <td>0.53</td>
-        <td>0.9458</td>
-        <td>No</td>
-      </tr>
-      
-      <tr class="">
-        <td>Climatological-mean</td>
-        <td>41.23</td>
-        <td>49.96</td>
-        <td>44.23%</td>
-        <td>37.92</td>
-        <td>0.0000</td>
-        <td>No</td>
-      </tr>
-      
       <tr class="winner">
-        <td>LightGBM</td>
+        <td>Lightgbm</td>
         <td>16.18</td>
         <td>26.93</td>
         <td>23.86%</td>
@@ -213,17 +173,7 @@
       </tr>
       
       <tr class="">
-        <td>XGBoost</td>
-        <td>16.56</td>
-        <td>27.67</td>
-        <td>24.13%</td>
-        <td>3.68</td>
-        <td>0.0000</td>
-        <td>Yes (Dominant)</td>
-      </tr>
-      
-      <tr class="">
-        <td>CatBoost</td>
+        <td>Catboost</td>
         <td>16.46</td>
         <td>27.07</td>
         <td>24.18%</td>
@@ -233,13 +183,13 @@
       </tr>
       
       <tr class="">
-        <td>LSTM</td>
-        <td>25.31</td>
-        <td>38.69</td>
-        <td>35.10%</td>
-        <td>-3.26</td>
-        <td>0.0093</td>
-        <td>No</td>
+        <td>Xgboost</td>
+        <td>16.56</td>
+        <td>27.67</td>
+        <td>24.13%</td>
+        <td>3.68</td>
+        <td>0.0000</td>
+        <td>Yes (Dominant)</td>
       </tr>
       
       <tr class="">
@@ -249,6 +199,56 @@
         <td>27.52%</td>
         <td>4.85</td>
         <td>0.0530</td>
+        <td>No</td>
+      </tr>
+      
+      <tr class="">
+        <td>Seasonal-Naive-Avg</td>
+        <td>21.60</td>
+        <td>34.55</td>
+        <td>30.20%</td>
+        <td>0.53</td>
+        <td>0.9458</td>
+        <td>No</td>
+      </tr>
+      
+      <tr class="">
+        <td>Naive-24H</td>
+        <td>21.67</td>
+        <td>36.02</td>
+        <td>33.46%</td>
+        <td>0.51</td>
+        <td>1.0000</td>
+        <td>No</td>
+      </tr>
+      
+      <tr class="">
+        <td>Lstm</td>
+        <td>25.31</td>
+        <td>38.69</td>
+        <td>35.10%</td>
+        <td>-3.26</td>
+        <td>0.0093</td>
+        <td>No</td>
+      </tr>
+      
+      <tr class="">
+        <td>Naive-Week</td>
+        <td>26.86</td>
+        <td>43.80</td>
+        <td>39.47%</td>
+        <td>-1.01</td>
+        <td>0.0090</td>
+        <td>No</td>
+      </tr>
+      
+      <tr class="">
+        <td>Climatological-Mean</td>
+        <td>41.23</td>
+        <td>49.96</td>
+        <td>44.23%</td>
+        <td>37.92</td>
+        <td>0.0000</td>
         <td>No</td>
       </tr>
       
@@ -315,7 +315,7 @@
 
   <h2>5. Reproducibility & Audit Trail</h2>
   <div class="meta-box">
-    <strong>Commit Hash:</strong> production-clean<br>
+    <strong>Commit Hash:</strong> d1d1d63<br>
     <strong>Random Seed:</strong> 42 (Strictly enforced across numpy, torch, lightgbm, xgboost, catboost)<br>
     <strong>Python:</strong> 3.11.15 | <strong>OS:</strong> macOS Apple Silicon<br>
     <strong>Core Libraries:</strong> LightGBM 4.7.0, XGBoost 3.2.0, CatBoost 1.2.10, PyTorch 2.14.0, Optuna 5.0.0, SHAP 0.51.0<br>

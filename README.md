@@ -1,67 +1,153 @@
-# Production-Grade Day-Ahead Electricity Price Forecasting (DE-LU & GB)
+# ⚡ Day-Ahead Electricity Price Forecasting (DE-LU & GB)
 
-[![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Tests Passing](https://img.shields.io/badge/tests-7%20passed-brightgreen.svg)]()
+[![Python 3.11](https://img.shields.io/badge/python-3.11-3776AB.svg?style=flat&logo=python&logoColor=white)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.14-EE4C2C.svg?style=flat&logo=pytorch&logoColor=white)](https://pytorch.org/)
+[![LightGBM](https://img.shields.io/badge/LightGBM-4.7-brightgreen.svg?style=flat)](https://lightgbm.readthedocs.io/)
+[![CatBoost](https://img.shields.io/badge/CatBoost-1.2-yellow.svg?style=flat)](https://catboost.ai/)
+[![XGBoost](https://img.shields.io/badge/XGBoost-3.2-blue.svg?style=flat)](https://xgboost.readthedocs.io/)
+[![Tests Passing](https://img.shields.io/badge/tests-7%20passed-success.svg?style=flat)]()
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat)](https://opensource.org/licenses/MIT)
 
-A quantitative, production-grade Day-Ahead (DA) electricity price forecasting system for the **German-Luxembourgish (DE-LU)** and **Great British (GB)** bidding zones.
+A production-grade, institutional Day-Ahead (DA) electricity price forecasting engine for the **German-Luxembourgish (DE-LU)** and **Great British (GB)** bidding zones. 
 
-This project delivers an institutional-grade machine learning workflow designed for energy trading desks, power schedulers, and quantitative analysts. It implements strict day-ahead gate closure enforcement (zero future lookahead), expanding-window walk-forward backtesting, rigorous statistical significance testing (Diebold-Mariano with Harvey-Leybourne-Newbold correction), probabilistic quantile intervals (pinball loss), and explainability via SHAP TreeExplainer.
-
----
-
-## 🏛️ System Architecture
-
-```mermaid
-flowchart TD
-    subgraph Data_Ingestion["1. Raw Data Ingestion (Idempotent Parquet)"]
-        E1["ENTSO-E Transparency Platform / Energy-Charts API (DE-LU)"]
-        E2["Elexon BMRS Insights API (GB Half-Hourly MID & NDF)"]
-        W1["Open-Meteo Historical ERA5 Reanalysis (Pop-Weighted Cities)"]
-    end
-
-    subgraph Feature_Engineering["2. Leakage-Safe Feature Engineering"]
-        G["Gate-Closure Shift >= 24h Enforcement"]
-        F1["Calendar & Fourier Harmonics (Daily k=3, Weekly k=3)"]
-        F2["Market Fundamentals (Residual Load, VRE Share, Ramps)"]
-        F3["Weather Proxies (Cubic Wind Power v³, HDD/CDD, Solar Irradiance)"]
-        F4["Autoregressive Price Lags (24h, 48h, 72h, 168h, Volatility, Peak Spread)"]
-    end
-
-    subgraph Modeling["3. Multi-Horizon Model Suite"]
-        B["4 Statistical Benchmarks: Naive-24h, Naive-week, Seasonal-7d, Climatological-HOW"]
-        M1["LightGBM (Direct 24-Step Multi-Horizon + Quantiles [q10, q50, q90])"]
-        M2["XGBoost (L1 Absolute Error Booster)"]
-        M3["CatBoost (Symmetric Trees)"]
-        M4["PyTorch LSTM (168h Lookback -> 24h Future Multi-Horizon Head)"]
-        M5["Hybrid Forecaster (LSTM Sequence Base + LightGBM Residual Model)"]
-    end
-
-    subgraph Evaluation["4. Walk-Forward Backtesting & Statistical Rigor"]
-        WF["Expanding Window Validation (Monthly Rolling Folds, No Shuffling)"]
-        MET["Metrics: MAE, RMSE, sMAPE, Pinball Loss, 80% Coverage, Bias"]
-        DM["Diebold-Mariano Test with HLN Small-Sample Correction vs Naive-24h"]
-    end
-
-    subgraph Outputs["5. Portfolio Deliverables"]
-        SHAP["SHAP TreeExplainer (Beeswarm, Dependence, Spike Waterfall)"]
-        HTML["Interactive final_report.html"]
-        PDF["One-Page C-Suite Executive Summary PDF"]
-    end
-
-    Data_Ingestion --> Feature_Engineering
-    Feature_Engineering --> Modeling
-    Modeling --> Evaluation
-    Evaluation --> Outputs
-```
+Engineered with **strict gate-closure enforcement (zero future lookahead)**, expanding-window walk-forward backtesting, probabilistic quantile intervals (pinball loss), Diebold–Mariano statistical significance testing, and fundamental interpretability via SHAP TreeExplainer.
 
 ---
 
-## ⚡ Quant Interview Defense: Three Critical Questions
+## 🏗️ System Architecture & Pipeline
+
+![End-to-End Pipeline Architecture](reports/figures/pipeline_architecture.png)
+
+---
+
+## 📌 1. The Problem: Electricity Price Volatility & Grid Constraints
+
+Unlike storable physical commodities such as crude oil or natural gas, **electricity cannot be cost-effectively stored at national grid scale**. Grid operators must continuously balance supply and generation every second.
+
+1. **The Day-Ahead Auction Constraint**:
+   * Every day at noon (**12:00 CET for DE-LU, 11:00 GMT for GB**), power plant operators, battery storage operators, and utilities must submit firm price/volume bids for all 24 hours of tomorrow.
+2. **Extreme Price Swings & Non-Linear Shocks**:
+   * During freezing winter evenings with low wind and high heating demand, expensive natural gas turbines set the marginal clearing price, driving prices upwards of **+€300 to +€500/MWh**.
+   * During sunny, windy weekend afternoons, non-dispatchable renewable generation can surge past demand, causing market prices to crash into **negative territory (-€50/MWh)** where generators pay consumers to consume electricity.
+3. **The Financial Stakes**:
+   * Erroneous price estimates expose trading desks, asset optimizers, and industrial consumers to massive imbalance penalties and unhedged market risk. Accurate, leakage-safe forecasting is worth millions in trading PnL and risk management.
+
+---
+
+## 💡 2. The Solution: Institutional Forecasting Engine
+
+Our system replaces heuristic rules of thumb with a multi-horizon, domain-aware quantitative pipeline:
+
+* **Strict Gate-Closure Adherence**:
+  * Realized market prices and fundamental generation data are strictly shifted by $\ge 24\text{h}$, matching the exact information available at auction cutoff.
+  * Verified programmatically via [`tests/test_lags_no_leakage.py`](tests/test_lags_no_leakage.py), which injects corrupting shocks into future raw data and asserts zero leakage into model feature matrices.
+* **Domain-Driven Fundamental Engineering**:
+  * **Residual Load** ($\text{Load} - \text{Wind} - \text{Solar}$), the true physical driver of thermal dispatch.
+  * **Clean Spark Spread Proxies** accounting for natural gas prices, heat rates, and ETS carbon costs.
+  * **Kinetic Power Proxies** ($v^3$) derived from population-weighted 100m wind speeds across major cities.
+  * **Calendar & Fourier Harmonics** ($k=3$ harmonics for $24\text{h}$ daily and $168\text{h}$ weekly cycles).
+* **Multi-Horizon Model Architecture**:
+  * Compares **9 distinct models per country** across classical baselines, direct multi-horizon gradient boosted trees, deep learning sequence networks, and two-stage residual hybrids.
+* **Expanding-Window Walk-Forward Validation**:
+  * Simulates genuine live deployment: trains on multi-year history, forecasts out-of-sample monthly blocks, rolls forward, and refits with zero chronological leakage.
+* **Statistical Rigor**:
+  * Evaluates **Diebold–Mariano tests** with the Harvey–Leybourne–Newbold (HLN 1997) small-sample correction against the industry-standard Naive-24h benchmark.
+
+---
+
+## 📊 3. Empirical Results: Benchmark League Tables
+
+### Germany-Luxembourg (DE-LU) Bidding Zone
+*Evaluated out-of-sample across monthly expanding-window folds:*
+
+| Model | MAE (€/MWh) | RMSE (€/MWh) | sMAPE (%) | Bias (€) | DM p-value vs Naive | Statistical Decision |
+|:---|:---:|:---:|:---:|:---:|:---:|:---|
+| **CatBoost** | **20.58** | **28.19** | **36.5%** | **+9.16** | **0.0000** | **🏆 STATISTICAL WINNER (26.4% Edge)** |
+| **XGBoost** | 21.84 | 29.35 | 37.4% | +13.17 | 0.0003 | Statistically Significant ($p < 0.001$) |
+| **LightGBM** | 21.93 | 30.16 | 37.4% | +12.18 | 0.0005 | Statistically Significant ($p < 0.001$) |
+| **Hybrid (LSTM + LGBM)**| 24.04 | 33.23 | 40.9% | +9.11 | 0.0280 | Statistically Significant ($p = 0.028$) |
+| **Naive-24h (Benchmark)** | 27.98 | 41.48 | 48.7% | +0.53 | *Benchmark* | Industry Persistence Baseline |
+| **Seasonal-naive-avg** | 29.62 | 39.94 | 47.0% | +1.37 | 0.1876 | Inconclusive ($p > 0.05$) |
+| **LSTM (PyTorch)** | 33.77 | 45.68 | 46.1% | +7.65 | 0.0019 | Underperformed Naive |
+| **Naive-week** | 34.81 | 48.32 | 54.6% | +5.80 | 0.0067 | Underperformed Naive |
+| **Climatological-mean** | 88.39 | 97.32 | 74.6% | +86.94 | 0.0000 | Underperformed Naive |
+
+---
+
+### Great Britain (GB) Bidding Zone
+*Evaluated out-of-sample across monthly expanding-window folds:*
+
+| Model | MAE (£/MWh) | RMSE (£/MWh) | sMAPE (%) | Bias (£) | DM p-value vs Naive | Statistical Decision |
+|:---|:---:|:---:|:---:|:---:|:---:|:---|
+| **LightGBM** | **16.18** | **26.93** | **23.9%** | **+3.14** | **0.0000** | **🏆 STATISTICAL WINNER (25.3% Edge)** |
+| **CatBoost** | 16.46 | 27.07 | 24.2% | +2.34 | 0.0000 | Statistically Significant ($p < 0.001$) |
+| **XGBoost** | 16.56 | 27.67 | 24.1% | +3.68 | 0.0000 | Statistically Significant ($p < 0.001$) |
+| **Hybrid (LSTM + LGBM)**| 19.64 | 31.82 | 27.5% | +4.85 | 0.0530 | Marginally Significant |
+| **Seasonal-naive-avg** | 21.60 | 34.55 | 30.2% | +0.53 | 0.9458 | Inconclusive ($p > 0.05$) |
+| **Naive-24h (Benchmark)** | 21.67 | 36.02 | 33.5% | +0.51 | *Benchmark* | Industry Persistence Baseline |
+| **LSTM (PyTorch)** | 25.31 | 38.69 | 35.1% | -3.26 | 0.0093 | Underperformed Naive |
+| **Naive-week** | 26.86 | 43.80 | 39.5% | -1.01 | 0.0090 | Underperformed Naive |
+| **Climatological-mean** | 41.23 | 49.96 | 44.2% | +37.92 | 0.0000 | Underperformed Naive |
+
+---
+
+## 📈 4. Visual Diagnostics & Output Gallery
+
+### A. Forecast vs Actual (14-Day Delivery Overlay with 80% Prediction Band)
+Shows out-of-sample delivery tracking against realized prices alongside calibrated probabilistic intervals $[q_{10}, q_{90}]$:
+
+| Germany (DE-LU) | Great Britain (GB) |
+|---|---|
+| ![DE-LU Forecast vs Actual](reports/figures/forecast_vs_actual_DE_LU_LightGBM.png) | ![GB Forecast vs Actual](reports/figures/forecast_vs_actual_GB_LightGBM.png) |
+
+---
+
+### B. Hour-of-Day Error Heatmaps (Grid Stress Windows)
+Maps out-of-sample MAE by delivery hour (0–23 UTC) and day of the week, highlighting morning ramps and evening cooking peaks:
+
+| Germany (DE-LU) Heatmap | Great Britain (GB) Heatmap |
+|---|---|
+| ![DE-LU Heatmap](reports/figures/hourly_mae_heatmap_DE_LU_LightGBM.png) | ![GB Heatmap](reports/figures/hourly_mae_heatmap_GB_LightGBM.png) |
+
+---
+
+### C. SHAP Feature Attribution (TreeExplainer Beeswarm)
+Quantifies the exact marginal price contribution (in €/MWh and £/MWh) of fundamentals:
+
+| Germany (DE-LU) SHAP Attribution | Great Britain (GB) SHAP Attribution |
+|---|---|
+| ![DE-LU SHAP](reports/figures/shap_summary_DE_LU.png) | ![GB SHAP](reports/figures/shap_summary_GB.png) |
+
+---
+
+### D. Peak Price Scarcity Breakdown (SHAP Waterfall)
+Local explanation identifying which fundamental shocks drove an extreme price spike:
+
+| Germany (DE-LU) Peak Spike Waterfall | Great Britain (GB) Peak Spike Waterfall |
+|---|---|
+| ![DE-LU Waterfall](reports/figures/shap_waterfall_spike_DE_LU.png) | ![GB Waterfall](reports/figures/shap_waterfall_spike_GB.png) |
+
+---
+
+## 🛠️ 5. Technology Stack & Technical Rationale
+
+| Category | Technology | Commercial / Technical Justification |
+|---|---|---|
+| **Runtime & Tooling** | **Python 3.11 + uv** | Blazing-fast virtual environment creation and deterministic dependency resolution on Apple Silicon (`arm64`). |
+| **Gradient Boosting** | **CatBoost, LightGBM, XGBoost** | Undisputed champions of tabular financial markets. Native handling of threshold non-linearities and step jumps in power merit-order curves. |
+| **Deep Learning** | **PyTorch (`torch`)** | Multi-horizon Sequence-to-Sequence **LSTM** with 128 hidden units capturing 168-hour lookback diurnal and weekly rhythms. |
+| **Explainability** | **SHAP** | Model-agnostic game-theoretic attribution (TreeExplainer). Crucial for trader trust and executive risk governance. |
+| **Statistical Rigor** | **Scipy & Statsmodels** | Implements the **Diebold–Mariano test with HLN correction**, accounting for autocorrelation in 24-step forecast errors. |
+| **Data Storage** | **PyArrow & Parquet** | High-performance, compressed columnar storage for millions of historical half-hourly and hourly time series. |
+| **Config & Types** | **Pydantic & PyYAML** | Centralized, validated configurations in [`config/`](config/) with zero hardcoded paths or parameters. |
+| **Reporting** | **ReportLab & Jinja2** | Automated compilation of interactive [`reports/final_report.html`](reports/final_report.html) and 1-page [`reports/executive_summary.pdf`](reports/executive_summary.pdf). |
+
+---
+
+## ⚡ 6. Quant Interview Defense: 3 Critical Concepts
 
 ### 1. Why Walk-Forward Expanding Window and NOT K-Fold Cross-Validation?
-Standard $K$-fold cross-validation randomly shuffles observations across time. In electricity price forecasting, this causes catastrophic temporal leakage: the model conditions on tomorrow's price spikes, merit-order shifts, and weather systems to predict yesterday's prices. 
+Standard $K$-fold cross-validation shuffles observations across time. In electricity price forecasting, this causes catastrophic temporal leakage: the model conditions on tomorrow's price spikes, merit-order shifts, and weather systems to predict yesterday's prices. 
 
 Our system uses an **Expanding Window Walk-Forward Backtest**:
 - Folds maintain strict chronological order: train window $[0, T]$ is used to forecast out-of-sample block $[T, T+1\text{ month}]$.
@@ -81,92 +167,45 @@ In European power auctions:
 - **GB (EPEX / Nord Pool / N2EX)**: Day-ahead auction gate closure clears around **11:00 GMT** on day $D-1$.
 - Any physical actual realization (e.g., actual wind generation or actual consumer demand) occurring at 14:00 or 18:00 on day $D-1$ is unknown at gate closure!
 - **Zero-Leakage Implementation:** All autoregressive prices, rolling means, volatility estimators, and realized fundamental variables are shifted by $\ge 24\text{h}$. Ex-ante features at delivery hour $t$ are limited strictly to published day-ahead forecasts (e.g., day-ahead demand forecast) and numerical weather predictions.
-- **Programmatic Proof:** `tests/test_lags_no_leakage.py` injects corrupting shocks into all raw series after gate closure and asserts that features computed for target hours remain identical.
+- **Programmatic Proof:** [`tests/test_lags_no_leakage.py`](tests/test_lags_no_leakage.py) injects corrupting shocks into all raw series after gate closure and asserts that features computed for target hours remain identical.
 
 ---
 
-## 📊 Benchmark Results
+## 🚀 7. Quickstart & Step-by-Step Reproduction
 
-### Germany-Luxembourg (DE-LU) Bidding Zone
-*Evaluated across expanding-window monthly walk-forward folds:*
-
-| Model | MAE (EUR/MWh) | RMSE (EUR/MWh) | sMAPE (%) | Bias | DM Test p-val vs Naive | Significant (p < 0.05) |
-|---|---|---|---|---|---|---|
-| **LightGBM (Winner)** | **14.28** | **20.14** | **15.2%** | **-0.42** | **< 0.0001** | **Yes (Dominant)** |
-| **Hybrid (LSTM + LGBM)** | 14.85 | 21.02 | 15.8% | -0.65 | < 0.0001 | Yes |
-| **CatBoost** | 15.10 | 21.45 | 16.1% | -0.38 | < 0.0001 | Yes |
-| **XGBoost** | 15.42 | 22.01 | 16.5% | -0.51 | < 0.0001 | Yes |
-| **LSTM (PyTorch)** | 16.95 | 24.12 | 18.2% | +0.84 | 0.0012 | Yes |
-| **Seasonal-naive-avg** | 21.30 | 29.80 | 22.8% | +0.12 | 0.0210 | Yes |
-| **Naive-24h (Benchmark)**| 24.15 | 34.20 | 25.4% | +0.05 | Benchmark | - |
-| **Naive-week** | 26.80 | 37.90 | 28.1% | +0.18 | 0.9820 | No |
-| **Climatological-mean** | 31.40 | 42.10 | 33.5% | -1.10 | 0.9990 | No |
-
-*LightGBM achieves a **40.9% error reduction** over the standard Naive-24h benchmark in DE-LU, with 80% prediction interval coverage of 81.4% (Pinball Loss = 5.82).*
-
-### Great Britain (GB) Bidding Zone
-| Model | MAE (GBP/MWh) | RMSE (GBP/MWh) | sMAPE (%) | Bias | DM Test p-val vs Naive | Significant (p < 0.05) |
-|---|---|---|---|---|---|---|
-| **LightGBM (Winner)** | **12.65** | **18.42** | **14.1%** | **-0.31** | **< 0.0001** | **Yes (Dominant)** |
-| **Hybrid (LSTM + LGBM)** | 13.12 | 19.10 | 14.7% | -0.44 | < 0.0001 | Yes |
-| **CatBoost** | 13.40 | 19.55 | 14.9% | -0.29 | < 0.0001 | Yes |
-| **XGBoost** | 13.75 | 20.08 | 15.3% | -0.35 | < 0.0001 | Yes |
-| **LSTM (PyTorch)** | 15.20 | 22.30 | 17.0% | +0.72 | 0.0024 | Yes |
-| **Seasonal-naive-avg** | 19.10 | 27.40 | 21.2% | +0.08 | 0.0180 | Yes |
-| **Naive-24h (Benchmark)**| 21.80 | 31.25 | 23.9% | +0.02 | Benchmark | - |
-| **Naive-week** | 24.50 | 34.80 | 26.5% | +0.14 | 0.9780 | No |
-| **Climatological-mean** | 28.90 | 39.10 | 31.0% | -0.95 | 0.9980 | No |
-
----
-
-## 🔍 Structural Market Insights & SHAP Interpretability
-
-1. **Germany (DE-LU) — The Renewable Merit-Order Effect:**
-   - The primary price suppressors are **kinetic wind generation ($v^3$)** and **solar irradiance**.
-   - **Residual load** ($\text{Load} - \text{Wind} - \text{Solar}$) has the highest global SHAP importance. During high renewable penetration (>100% of load), marginal generation collapses to negative bidding thresholds.
-   - Coal and lignite provide baseload support, while gas turbines set the marginal clearing price during tight evening peaks.
-
-2. **Great Britain (GB) — The Gas Spark Spread & Interconnector Anchor:**
-   - Great Britain exhibits significantly higher marginal sensitivity to **clean spark spreads** and gas prices due to heavy CCGT reliance.
-   - Wind generation in Scotland and the North Sea drives strong local price suppression, but transmission constraints often cause price separation.
-   - **Cross-border interconnector flows** (IFA/IFA2 to France, BritNed to Netherlands, Nemo Link to Belgium, North Sea Link to Norway) act as vital price arbiters.
-
----
-
-## 🚀 Quickstart & Reproduction
-
-### Prerequisites
-- Python 3.11+
-- `uv` (recommended) or `pip`
-
-### Step 1: Setup Environment
+### Step 1: Clone Repository
 ```bash
-git clone https://github.com/example/da-power-price-forecast-gb-de.git
-cd da-power-price-forecast-gb-de
+git clone https://github.com/DGskywalker/da-power-price-forecast.git
+cd da-power-price-forecast
+```
+
+### Step 2: Setup Environment
+```bash
 make setup
 ```
 
-### Step 2: Run Unit & Leakage Tests
+### Step 3: Run Unit & Gate-Closure Leakage Tests
 ```bash
 make test
 ```
-*Asserts programmatic zero lookahead across all 24 delivery horizons.*
+*Executes all 7 unit tests, verifying zero lookahead leakage across all 24 delivery horizons.*
 
-### Step 3: Run Full Pipeline End-to-End
+### Step 4: Run End-to-End Pipeline
 ```bash
 make all
 ```
-*Executes ingestion, feature assembly, walk-forward training across all 9 models, Diebold-Mariano tests, SHAP plots, and compiles `reports/final_report.html` and `reports/executive_summary.pdf`.*
+*Runs data ingestion, feature assembly, walk-forward training across all 9 models, Diebold-Mariano tests, SHAP plots, and compiles `reports/final_report.html` and `reports/executive_summary.pdf`.*
 
 ---
 
-## 📁 Repository Layout
+## 📂 Repository Directory Layout
 
 ```text
-da-power-price-forecast-gb-de/
-├── README.md                     # Institutional documentation & quant defense
-├── pyproject.toml                # UV / pip dependency pins
+da-power-price-forecast/
+├── README.md                     # Institutional documentation & visual gallery
+├── pyproject.toml                # UV / pip dependency configurations
 ├── .env.example                  # API key placeholders
+├── .gitignore                    # Python & environment git exclusions
 ├── Makefile                      # make setup / make data / make test / make all
 ├── config/
 │   ├── base.yaml                 # Bidding zones, date ranges, weather cities, seeds
@@ -216,13 +255,5 @@ da-power-price-forecast-gb-de/
 
 ---
 
-## 🔮 Limitations & What I'd Do Next
-
-1. **Intraday & Balancing Mechanism Coupling:**
-   - Day-ahead forecasts provide the base dispatch schedule, but substantial trading margin exists in continuous intraday (XBID) and balancing mechanism reserve markets. I would extend this architecture to 15-minute resolution for rolling intraday recalibration.
-2. **Ex-Ante Ensemble Stacking:**
-   - Build a Meta-Learner (Ridge or Lasso with non-negative constraints) that dynamically weights predictions from LightGBM, CatBoost, and LSTM based on rolling 7-day error covariance.
-3. **Outage Information (REMIT):**
-   - Incorporate REMIT unavailabilities (nuclear and CCGT unplanned outages) from Elexon and ENTSO-E to capture sudden supply-curve leftward shifts.
-4. **Extreme Spike Modeling via Extreme Value Theory (EVT):**
-   - Implement a generalized Pareto distribution (GPD) tail model for prices exceeding €250/MWh to better protect trading portfolios against extreme scarcity spikes.
+## 📜 License
+Distributed under the **MIT License**. See `LICENSE` for more information.
