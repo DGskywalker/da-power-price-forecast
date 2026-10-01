@@ -16,7 +16,7 @@ Engineered with **strict gate-closure enforcement (zero future lookahead)**, exp
 
 ## System Architecture & Pipeline
 
-![End-to-End Pipeline Architecture](reports/figures/pipeline_architecture.png)
+![End-to-End Pipeline Architecture](output/pipeline_architecture.png)
 
 ---
 
@@ -56,6 +56,9 @@ Our system replaces heuristic rules of thumb with a multi-horizon, domain-aware 
 ---
 
 ## 3. Empirical Results: Benchmark League Tables
+### Execution Benchmark Output
+![Terminal Benchmark Results](output/terminal_benchmark_results.png)
+
 
 ### Germany-Luxembourg (DE-LU) Bidding Zone
 *Evaluated out-of-sample across monthly expanding-window folds:*
@@ -98,7 +101,7 @@ Shows out-of-sample delivery tracking against realized prices alongside calibrat
 
 | Germany (DE-LU) | Great Britain (GB) |
 |---|---|
-| ![DE-LU Forecast vs Actual](reports/figures/forecast_vs_actual_DE_LU_LightGBM.png) | ![GB Forecast vs Actual](reports/figures/forecast_vs_actual_GB_LightGBM.png) |
+| ![DE-LU Forecast vs Actual](output/forecast_vs_actual_DE_LU_LightGBM.png) | ![GB Forecast vs Actual](output/forecast_vs_actual_GB_LightGBM.png) |
 
 ---
 
@@ -107,7 +110,7 @@ Maps out-of-sample MAE by delivery hour (0–23 UTC) and day of the week, highli
 
 | Germany (DE-LU) Heatmap | Great Britain (GB) Heatmap |
 |---|---|
-| ![DE-LU Heatmap](reports/figures/hourly_mae_heatmap_DE_LU_LightGBM.png) | ![GB Heatmap](reports/figures/hourly_mae_heatmap_GB_LightGBM.png) |
+| ![DE-LU Heatmap](output/hourly_mae_heatmap_DE_LU_LightGBM.png) | ![GB Heatmap](output/hourly_mae_heatmap_GB_LightGBM.png) |
 
 ---
 
@@ -116,7 +119,7 @@ Quantifies the exact marginal price contribution (in €/MWh and £/MWh) of fund
 
 | Germany (DE-LU) SHAP Attribution | Great Britain (GB) SHAP Attribution |
 |---|---|
-| ![DE-LU SHAP](reports/figures/shap_summary_DE_LU.png) | ![GB SHAP](reports/figures/shap_summary_GB.png) |
+| ![DE-LU SHAP](output/shap_summary_DE_LU.png) | ![GB SHAP](output/shap_summary_GB.png) |
 
 ---
 
@@ -125,7 +128,7 @@ Local explanation identifying which fundamental shocks drove an extreme price sp
 
 | Germany (DE-LU) Peak Spike Waterfall | Great Britain (GB) Peak Spike Waterfall |
 |---|---|
-| ![DE-LU Waterfall](reports/figures/shap_waterfall_spike_DE_LU.png) | ![GB Waterfall](reports/figures/shap_waterfall_spike_GB.png) |
+| ![DE-LU Waterfall](output/shap_waterfall_spike_DE_LU.png) | ![GB Waterfall](output/shap_waterfall_spike_GB.png) |
 
 ---
 
