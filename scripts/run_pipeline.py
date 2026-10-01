@@ -331,7 +331,7 @@ def run_pipeline():
     report_gen.generate_executive_pdf(de_tab, gb_tab, exec_summary)
     print("STATUS: Stage 5 Report Generation Complete.")
 
-    # 8. Print League Tables to Console for Portfolio Screenshot
+    # 8. Print League Tables to Console for Empirical Verification
     print("\n" + "=" * 90)
     print("      DAY-AHEAD POWER PRICE FORECASTING BENCHMARK LEAGUE TABLE (DE-LU)")
     print("=" * 90)

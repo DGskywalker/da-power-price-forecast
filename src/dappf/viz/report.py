@@ -45,8 +45,8 @@ HTML_TEMPLATE = """
 </head>
 <body>
 <div class="container">
-  <h1>⚡ Day-Ahead Power Price Forecasting (DE-LU & GB)</h1>
-  <p><span class="badge badge-primary">Quantitative Trading Portfolio</span> <span class="badge badge-success">Production Grade</span> | Generated: {{ generation_time }}</p>
+  <h1>Day-Ahead Power Price Forecasting (DE-LU & GB)</h1>
+  <p><span class="badge badge-primary">Quantitative Energy Research</span> <span class="badge badge-success">Production Grade</span> | Generated: {{ generation_time }}</p>
 
   <div class="exec-summary">
     <strong>Executive Summary:</strong>
